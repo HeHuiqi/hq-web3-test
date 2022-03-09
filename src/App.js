@@ -4,8 +4,9 @@ import { BigNumber, ethers } from 'ethers';
 import networks from './HqNetworks';
 import HqMusicAbi from './abi/HqMusic.json';
 import HqDaiAbi from './abi/Dai.json';
-
+import HqGardenAbi from './abi/Garden.json'
 import HqRouterAbi from './abi/UNIRouter.json';
+
 const HqRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 
 // https://rinkeby.etherscan.io/address/0xe897f96867953673a2fd264b7003aa7dcd780e54#readContract
@@ -14,6 +15,7 @@ const HqMusicAddress = "0xe897f96867953673a2fd264b7003aA7dcD780e54";
 // https://rinkeby.etherscan.io/address/0xc7ad46e0b8a400bb3c915120d284aafba8fc4735#code dai
 const HqDaiAddress = "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735";
 
+const HqGardenAddress = '0xAc79cf53C72b47c1478D340D435e28907426D01E'
 
 
 const { ethereum } = window;
@@ -52,6 +54,10 @@ switch (testChoose) {
     initAddress = HqRouterAddress;
     initAbi = HqRouterAbi;
     break;
+    case 3:
+      initAddress = HqGardenAddress;
+      initAbi = HqGardenAbi;
+      break;
 
 
   default:
@@ -85,14 +91,11 @@ function ContractMethodsList(props) {
 
 function InputPanel(props) {
   //console.log(props.inputs);
-  let inputParam = {
 
-  };
   const inputChange = function (event) {
     // //console.log('event.target.value:',event.target.index);
     const key = 'value-' + event.target.name;
-    inputParam[key] = event.target.value;
-    props.inputChange(inputParam);
+    props.inputChange(key,event.target.value);
   }
   var items = [];
   let i = 0;
@@ -198,6 +201,7 @@ function App() {
     let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
     if (values.length > 0) {
       let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x0777999....
+
       data = data + params.slice(2);
     }
     let transaction = {
@@ -248,13 +252,19 @@ function App() {
     }
   }
 
-  const formatCallResult = function(result){
+  const formatCallResult = function(result,outputs){
     let showRes = [];
     for (let index = 0; index < result.length; index++) {
       const element = result[index];
       const haha = JSON.parse(JSON.stringify(element));
       if( haha.type === 'BigNumber'){
+        let outName = '';
+        if(index < outputs.length){
+          const output =  outputs[index];
+          outName = output.name;
+        }
         const ele = {
+          name: outName,
           type:'BigNumber',
           value: element.toString(),
         }
@@ -262,8 +272,10 @@ function App() {
       }else{
         showRes.push(element);
       }
+      
+      // showRes.push(element);
+
     }
-    console.log('showRes:',showRes);
     return showRes;
   };
 
@@ -283,7 +295,7 @@ function App() {
     }
     let method = methodInfo.name + '(' + inputs.slice(1) + ')';
     console.log('method:', method);
-
+    console.log('inputParams:',inputParams);
     let params = [];
     Object.keys(inputParams).forEach(function (key) {
       params.push(inputParams[key]);
@@ -292,9 +304,11 @@ function App() {
     if (methodInfo.stateMutability === 'view') {
       const provider = getProvider();
       if (provider) {
-        const callRes = await callContractFunc(method, inputs.split(',').slice(1), params, provider);
-        let res = ethers.utils.defaultAbiCoder.decode(outputs.split(',').slice(1), callRes);
-        res = formatCallResult(res);
+        const inputTypes = inputs.split(',').slice(1);
+        const callRes = await callContractFunc(method, inputTypes, params, provider);
+        const outputTypes = outputs.split(',').slice(1);
+        let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
+        res = formatCallResult(res,methodInfo.outputs);
         setTxeResult(JSON.stringify(res));
       }
     } else {
@@ -328,9 +342,10 @@ function App() {
 
   };
 
-  const inputChange = function (value) {
-    //console.log('parent.value:', value);
-    setInputParams(value);
+  const inputChange = function (key,value) {
+    let params = inputParams;
+    params[key] = value;
+    setInputParams(params);
   }
 
   return (
