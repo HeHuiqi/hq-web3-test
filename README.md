@@ -1,5 +1,6 @@
 # 页面预览
-![snapshot](snapshot/test-page.png)
+![snapshot](snapshot/bsc-test-page.png)
+![snapshot](snapshot/rinkeby-test-page.png)
 
 # 必要条件
 * 安装 `Matemsk` 钱包扩展

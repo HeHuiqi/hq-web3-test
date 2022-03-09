@@ -44,7 +44,7 @@ const getProvider = function () {
 
 let initAddress = HqMusicAddress;
 let initAbi = HqMusicAbi;
-let testChoose = 3;
+let testChoose = 1;
 switch (testChoose) {
   case 1:
     initAddress = HqDaiAddress;
