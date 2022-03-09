@@ -1,5 +1,5 @@
 # 页面预览
-![gdg]("test-page.png")
+![snapshot](snapshot/test-page.png)
 
 # 必要条件
 * 安装 `Matemsk` 钱包扩展
