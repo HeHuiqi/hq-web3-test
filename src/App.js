@@ -15,6 +15,7 @@ const HqMusicAddress = "0xe897f96867953673a2fd264b7003aA7dcD780e54";
 // https://rinkeby.etherscan.io/address/0xc7ad46e0b8a400bb3c915120d284aafba8fc4735#code dai
 const HqDaiAddress = "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735";
 
+// https://testnet.bscscan.com/address/0xAc79cf53C72b47c1478D340D435e28907426D01E#code
 const HqGardenAddress = '0xAc79cf53C72b47c1478D340D435e28907426D01E'
 
 
@@ -44,7 +45,7 @@ const getProvider = function () {
 
 let initAddress = HqMusicAddress;
 let initAbi = HqMusicAbi;
-let testChoose = 0;
+let testChoose = 1;
 switch (testChoose) {
   case 1:
     initAddress = HqDaiAddress;

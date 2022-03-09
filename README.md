@@ -1,10 +1,12 @@
 # 页面预览
 
-读合约
-![snapshot](snapshot/rinkeby-test-page.png)
-写合约
+写合约 [0xe897f96867953673a2fd264b7003aA7dcD780e54 (rinkeby)](https://rinkeby.etherscan.io/address/0xe897f96867953673a2fd264b7003aa7dcd780e54#writeContract)
 ![snapshot](snapshot/rinkeby-test-write.jpg)
-读合约
+
+读合约 [0xc7ad46e0b8a400bb3c915120d284aafba8fc4735 (rinkeby dai-token)](https://rinkeby.etherscan.io/address/0xc7ad46e0b8a400bb3c915120d284aafba8fc4735#readContract)
+![snapshot](snapshot/rinkeby-test-page.png)
+
+读合约 [0xAc79cf53C72b47c1478D340D435e28907426D01E (Bsctest Garden)](https://testnet.bscscan.com/address/0xAc79cf53C72b47c1478D340D435e28907426D01E#code)
 ![snapshot](snapshot/bsc-test-page.png)
 
 
