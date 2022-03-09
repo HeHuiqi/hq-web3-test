@@ -44,7 +44,7 @@ const getProvider = function () {
 
 let initAddress = HqMusicAddress;
 let initAbi = HqMusicAbi;
-let testChoose = 1;
+let testChoose = 3;
 switch (testChoose) {
   case 1:
     initAddress = HqDaiAddress;
@@ -54,10 +54,10 @@ switch (testChoose) {
     initAddress = HqRouterAddress;
     initAbi = HqRouterAbi;
     break;
-    case 3:
-      initAddress = HqGardenAddress;
-      initAbi = HqGardenAbi;
-      break;
+  case 3:
+    initAddress = HqGardenAddress;
+    initAbi = HqGardenAbi;
+    break;
 
 
   default:
@@ -95,7 +95,7 @@ function InputPanel(props) {
   const inputChange = function (event) {
     // //console.log('event.target.value:',event.target.index);
     const key = 'value-' + event.target.name;
-    props.inputChange(key,event.target.value);
+    props.inputChange(key, event.target.value);
   }
   var items = [];
   let i = 0;
@@ -252,27 +252,27 @@ function App() {
     }
   }
 
-  const formatCallResult = function(result,outputs){
+  const formatCallResult = function (result, outputs) {
     let showRes = [];
     for (let index = 0; index < result.length; index++) {
       const element = result[index];
       const haha = JSON.parse(JSON.stringify(element));
-      if( haha.type === 'BigNumber'){
+      if (haha.type === 'BigNumber') {
         let outName = '';
-        if(index < outputs.length){
-          const output =  outputs[index];
+        if (index < outputs.length) {
+          const output = outputs[index];
           outName = output.name;
         }
         const ele = {
           name: outName,
-          type:'BigNumber',
+          type: 'BigNumber',
           value: element.toString(),
         }
         showRes.push(ele);
-      }else{
+      } else {
         showRes.push(element);
       }
-      
+
       // showRes.push(element);
 
     }
@@ -295,7 +295,7 @@ function App() {
     }
     let method = methodInfo.name + '(' + inputs.slice(1) + ')';
     console.log('method:', method);
-    console.log('inputParams:',inputParams);
+    console.log('inputParams:', inputParams);
     let params = [];
     Object.keys(inputParams).forEach(function (key) {
       params.push(inputParams[key]);
@@ -308,7 +308,7 @@ function App() {
         const callRes = await callContractFunc(method, inputTypes, params, provider);
         const outputTypes = outputs.split(',').slice(1);
         let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
-        res = formatCallResult(res,methodInfo.outputs);
+        res = formatCallResult(res, methodInfo.outputs);
         setTxeResult(JSON.stringify(res));
       }
     } else {
@@ -342,7 +342,7 @@ function App() {
 
   };
 
-  const inputChange = function (key,value) {
+  const inputChange = function (key, value) {
     let params = inputParams;
     params[key] = value;
     setInputParams(params);
