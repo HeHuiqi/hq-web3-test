@@ -1,0 +1,48 @@
+.App {
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+button {
+    height: 30px;
+}
+
+.showNetwork {
+    color: rgb(8, 138, 138);
+    font-size: 20px;
+}
+
+.contractInfo {
+    padding: 10px;
+    width: 100%;
+    background-color: #61dafb;
+    border-radius: 5px;
+}
+
+.contractInfo input {
+    outline-style: none;
+    width: 40%;
+    height: 30px;
+}
+
+.contractInfo select {
+    outline-style: none;
+    width: 15%;
+    height: 30px;
+}
+
+.contractInfo textarea {
+    width: 98%;
+    padding: 5px;
+    max-width: 98%;
+}
+
+.exeOperate {
+    margin-top: 20px;
+}
+
+.txResult {
+    padding: 10px;
+    background-color: rgb(60, 221, 168);
+    border-radius: 5px;
+}
