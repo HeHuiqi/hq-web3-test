@@ -144,7 +144,7 @@ function App() {
   const [contractAddress, setContractAddress] = useState(initAddress);
   const [selecteIndex, setSelecteIndex] = useState(0);
   const [inputParams, setInputParams] = useState({});
-  const [exeResult, setTxeResult] = useState();
+  const [exeResult, setExeResult] = useState();
 
 
   const checkWalletIsConnected = async () => {
@@ -233,6 +233,7 @@ function App() {
   const onSelectMethodChange = function (selectedIndex) {
     setSelecteIndex(selectedIndex);
     setInputParams({});
+    setExeResult('')
   };
 
   const onAbiChange = function (event) {
@@ -272,9 +273,6 @@ function App() {
       } else {
         showRes.push(element);
       }
-
-      // showRes.push(element);
-
     }
     return showRes;
   };
@@ -301,18 +299,17 @@ function App() {
       params.push(inputParams[key]);
     });
 
+    const provider = getProvider();
     if (methodInfo.stateMutability === 'view') {
-      const provider = getProvider();
       if (provider) {
         const inputTypes = inputs.split(',').slice(1);
         const callRes = await callContractFunc(method, inputTypes, params, provider);
         const outputTypes = outputs.split(',').slice(1);
         let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
         res = formatCallResult(res, methodInfo.outputs);
-        setTxeResult(JSON.stringify(res));
+        setExeResult(JSON.stringify(res));
       }
     } else {
-      const provider = getProvider();
       if (provider) {
         const signer = provider.getSigner();
         let ethValue = '0x00';
@@ -334,7 +331,7 @@ function App() {
         const txUrl = `${explorer}/${nftTxn.hash}`;
         console.log('txUrl:', txUrl);
         const txLink = <a href={txUrl}>交易查询</a>
-        setTxeResult(txLink);
+        setExeResult(txLink);
       }
 
     }
