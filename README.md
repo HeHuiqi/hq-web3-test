@@ -1,6 +1,13 @@
 # 页面预览
-![snapshot](snapshot/bsc-test-page.png)
+
+读合约
 ![snapshot](snapshot/rinkeby-test-page.png)
+写合约
+![snapshot](snapshot/rinkeby-test-write.jpg)
+读合约
+![snapshot](snapshot/bsc-test-page.png)
+
+
 
 # 必要条件
 * 安装 `Matemsk` 钱包扩展
