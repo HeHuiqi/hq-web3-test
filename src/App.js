@@ -7,6 +7,7 @@ import HqDaiAbi from './abi/Dai.json';
 import HqGardenAbi from './abi/Garden.json'
 import HqRouterAbi from './abi/UNIRouter.json';
 
+// https://rinkeby.etherscan.io/address/0x7a250d5630b4cf539739df2c5dacb4c659f2488d#readContract
 const HqRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 
 // https://rinkeby.etherscan.io/address/0xe897f96867953673a2fd264b7003aa7dcd780e54#readContract
@@ -45,7 +46,7 @@ const getProvider = function () {
 
 let initAddress = HqMusicAddress;
 let initAbi = HqMusicAbi;
-let testChoose = 1;
+let testChoose = 2;
 switch (testChoose) {
   case 1:
     initAddress = HqDaiAddress;
@@ -244,6 +245,8 @@ function App() {
       abi = filterAbi(abi);
       setContractAbi(abi);
       setSelecteIndex(0);
+      setInputParams({});
+      setExeResult('')
     }
 
   };
@@ -251,6 +254,8 @@ function App() {
     const value = event.target.value;
     if (value) {
       setContractAddress(value);
+      setInputParams({});
+      setExeResult('')
     }
   }
 
