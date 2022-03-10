@@ -102,9 +102,9 @@ function InputPanel(props) {
     let tag = <p key={i}> {param}: <input className='userInput' placeholder='请输入' onChange={inputChange} name={i} /> </p>;
     items.push(tag)
   }
-  console.log('props.isClearInput:',props.isClearInput);
-  if(props.isClearInput){
-    const userInputs =  document.getElementsByClassName('userInput');
+  console.log('props.isClearInput:', props.isClearInput);
+  if (props.isClearInput) {
+    const userInputs = document.getElementsByClassName('userInput');
     for (let index = 0; index < userInputs.length; index++) {
       const element = userInputs[index];
       element.value = '';
@@ -175,20 +175,22 @@ function App() {
 
   const sendContractTx = async function (methodName, types, values, ethValue, signer) {
     let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
-    let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x00dgjkdsgg000.....
-    if (values.length > 0) {
-      data = data + params.slice(2);
-    }
-    const transaction = {
-      to: contractAddress,
-      value: ethValue,
-      data: data
-    };
+
     let sendPromise;
     try {
+      let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x00dgjkdsgg000.....
+      if (values.length > 0) {
+        data = data + params.slice(2);
+      }
+      const transaction = {
+        to: contractAddress,
+        value: ethValue,
+        data: data
+      };
       sendPromise = await signer.sendTransaction(transaction);
 
     } catch (error) {
+      console.log('sendContractTx-:', error);
       alert(error);
     }
     console.log('sendPromise:', sendPromise);
@@ -197,21 +199,21 @@ function App() {
   };
   const callContractFunc = async function (methodName, types, values, provider) {
     let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
-    if (values.length > 0) {
-      let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x0777999....
 
-      data = data + params.slice(2);
-    }
-    let transaction = {
-      to: contractAddress,
-      data: data
-    };
-    console.log('callContractFunc-transaction:', transaction);
     let callRes;
     try {
+      if (values.length > 0) {
+        let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x0777999....
+        data = data + params.slice(2);
+      }
+      let transaction = {
+        to: contractAddress,
+        data: data
+      };
+      console.log('callContractFunc-transaction:', transaction);
       callRes = await provider.call(transaction);
     } catch (error) {
-      console.log('errr:',error);
+      console.log('callContractFunc-eror:', error);
       alert(error);
     }
     console.log('callRes:', callRes);
@@ -242,7 +244,7 @@ function App() {
 
   };
 
-  const resetInitState = function(){
+  const resetInitState = function () {
     setSelecteIndex(0);
     setInputParams({});
     setClearInputValue(true);
@@ -271,7 +273,7 @@ function App() {
     let showRes = [];
     for (let index = 0; index < result.length; index++) {
       const element = result[index];
-      
+
       const haha = JSON.parse(JSON.stringify(element));
       if (haha.type === 'BigNumber') {
         let outName = '';
@@ -283,29 +285,29 @@ function App() {
           type: 'BigNumber',
           value: element.toString(),
         }
-        if(outName !== ''){
+        if (outName !== '') {
           ele.name = outName;
         }
         showRes.push(ele);
       } else {
         showRes.push(element);
       }
-      
+
       // showRes.push(element);
 
     }
     return showRes;
   };
 
- 
-  
-  const formatParamTypes = function(typeInfos){
-    let newTypes = typeInfos.map((typeInfo)=>{
-        return typeInfo.type
+
+
+  const formatParamTypes = function (typeInfos) {
+    let newTypes = typeInfos.map((typeInfo) => {
+      return typeInfo.type
     });
     return newTypes;
   };
-  
+
   const exeContrantMethod = async function () {
     setExeResult('');
     setClearInputValue(false);
@@ -323,21 +325,21 @@ function App() {
     Object.keys(inputParams).forEach(function (key) {
       params.push(inputParams[key]);
     });
-    
+
     const provider = getProvider();
     if (methodInfo.stateMutability === 'view' || methodInfo.stateMutability === 'pure') {
 
       if (provider) {
         console.log('send call');
         const callRes = await callContractFunc(method, inputTypes, params, provider);
-        if(callRes === '0x'){
+        if (callRes === '0x') {
           alert('亲选择正确的网络测试');
-        }else{
+        } else {
           let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
           res = formatCallResult(res, methodInfo.outputs);
           setExeResult(JSON.stringify(res));
         }
- 
+
       }
     } else {
       if (provider) {
@@ -357,11 +359,14 @@ function App() {
         } else {
           nftTxn = await sendContractTx(method, inputTypes, params, ethValue, signer);
         }
-        const explorer = HqNetworks[ethereum.chainId].explorer;
-        const txUrl = `${explorer}/${nftTxn.hash}`;
-        console.log('txUrl:', txUrl);
-        const txLink = <a href={txUrl}>交易查询</a>
-        setExeResult(txLink);
+        if(nftTxn){
+          const explorer = HqNetworks[ethereum.chainId].explorer;
+          const txUrl = `${explorer}/${nftTxn.hash}`;
+          console.log('txUrl:', txUrl);
+          const txLink = <a href={txUrl}>交易查询</a>
+          setExeResult(txLink);
+        }
+
       }
 
     }
