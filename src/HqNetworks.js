@@ -60,6 +60,12 @@ const networks = {
         url:'https://polygon-mainnet.infura.io/v3/295cce92179b4be498665b1b16dfee34',
         name:'Polygon'
     },
+    '0x63564c40':{
+      chainId:1666600000,
+      url:'https://api.s0.t.hmny.io',
+      name:'Harmony',
+      explorer:'https://explorer.harmony.one/tx',
+  },
     
     
   };
