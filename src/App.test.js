@@ -1,6 +1,11 @@
-import { render, screen } from '@testing-library/react';
 
+const obj = {
 
+  goRun: function(speed,action){
+   console.log('speed:',speed);
+   console.log('action:',action); 
+  }
+};
 
 const formatParamTypes = function(types){
   let newTypes = types.map((currentValue)=>{
@@ -15,6 +20,11 @@ const formatParamTypes = function(types){
 test('renders learn react link', () => {
  
   console.log('App.test.js 这里 写测试代码');
-  let ps = [1,2,3,4,5];
-  formatParamTypes(ps);
+  // let ps = [1,2,3,4,5];
+  // formatParamTypes(ps);
+  // obj['goRun'].call(obj,3,5,6);
+  // obj['goRun'].bind(obj,3,5,6)();
+  obj['goRun'].apply(obj,[3,5,6]);
+
+
 });

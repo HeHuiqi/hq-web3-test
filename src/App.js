@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import { BigNumber, ethers } from 'ethers';
 import networks from './HqNetworks';
+import { HqUtils } from './HqUtils';
 import HqMusicAbi from './abi/HqMusic.json';
 import HqDaiAbi from './abi/Dai.json';
 import HqGardenAbi from './abi/Garden.json'
@@ -19,7 +20,6 @@ const HqDaiAddress = "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735";
 // https://testnet.bscscan.com/address/0xAc79cf53C72b47c1478D340D435e28907426D01E#code
 const HqGardenAddress = '0xAc79cf53C72b47c1478D340D435e28907426D01E'
 
-
 const { ethereum } = window;
 if (ethereum) {
   ethereum.on('accountsChanged', (accounts) => {
@@ -34,14 +34,11 @@ if (ethereum) {
 
 const getProvider = function () {
   if (ethereum) {
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    // console.log('getProvider-provider:',provider);
+    const provider = HqUtils.getProvider(ethereum);
     return provider;
   }
   return null
 };
-
-
 
 
 let initAddress = HqMusicAddress;
@@ -90,8 +87,6 @@ function ContractMethodsList(props) {
 };
 
 function InputPanel(props) {
-  //console.log(props.inputs);
-
   const inputChange = function (event) {
     // //console.log('event.target.value:',event.target.index);
     const key = 'value-' + event.target.name;
@@ -107,6 +102,7 @@ function InputPanel(props) {
     let tag = <p key={i}> {param}: <input className='userInput' placeholder='请输入' onChange={inputChange} name={i} /> </p>;
     items.push(tag)
   }
+  console.log('props.isClearInput:',props.isClearInput);
   if(props.isClearInput){
     const userInputs =  document.getElementsByClassName('userInput');
     for (let index = 0; index < userInputs.length; index++) {
@@ -131,23 +127,11 @@ function InputPanel(props) {
   );
 }
 
-const filterAbi = function (abi) {
-  let res = [];
-  for (let index = 0; index < abi.length; index++) {
-    const element = abi[index];
-    if (element.type === 'function') {
-      res.push(element);
-    }
-
-  }
-  return res;
-}
-
 function App() {
 
   const [currentAccount, setCurrentAccount] = useState('');
-  const [networkName, setNetworkName] = useState('Rinkeby');
-  const [ContractAbi, setContractAbi] = useState(filterAbi(initAbi));
+  const [networkName, setNetworkName] = useState('');
+  const [ContractAbi, setContractAbi] = useState(HqUtils.filterAbi(initAbi));
   const [contractAddress, setContractAddress] = useState(initAddress);
   const [selecteIndex, setSelecteIndex] = useState(0);
   const [inputParams, setInputParams] = useState({});
@@ -244,6 +228,7 @@ function App() {
     setInputParams({});
     setExeResult('')
     setClearInputValue(true);
+
   };
 
   const resetInitState = function(){
@@ -251,14 +236,13 @@ function App() {
     setInputParams({});
     setClearInputValue(true);
     setExeResult('')
-    setClearInputValue(true);
   };
 
   const onAbiChange = function (event) {
     const value = event.target.value;
     if (value) {
       let abi = JSON.parse(value);
-      abi = filterAbi(abi);
+      abi = HqUtils.filterAbi(abi);
       setContractAbi(abi);
       resetInitState();
     }
@@ -295,6 +279,8 @@ function App() {
     }
     return showRes;
   };
+
+ 
   
   const formatParamTypes = function(typeInfos){
     let newTypes = typeInfos.map((typeInfo)=>{
@@ -304,6 +290,10 @@ function App() {
   };
   
   const exeContrantMethod = async function () {
+    setExeResult('');
+    setClearInputValue(false);
+
+
     const selectMethodTag = document.getElementById('selectMethodTag');
     const methodInfo = ContractAbi[selectMethodTag.selectedIndex];
     console.log('methodInfo.stateMutability:', methodInfo.stateMutability);
@@ -318,7 +308,6 @@ function App() {
     });
     
     const provider = getProvider();
-
     if (methodInfo.stateMutability === 'view' || methodInfo.stateMutability === 'pure') {
 
       if (provider) {
