@@ -1,4 +1,4 @@
-const networks = {
+const HqNetworks = {
     "0x1":{
       chainId: 1,
       url:'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
@@ -58,7 +58,8 @@ const networks = {
     '0x89':{
         chainId:137,
         url:'https://polygon-mainnet.infura.io/v3/295cce92179b4be498665b1b16dfee34',
-        name:'Polygon'
+        name:'Polygon',
+        explorer:'https://polygonscan.com/tx'
     },
     '0x63564c40':{
       chainId:1666600000,
@@ -69,6 +70,6 @@ const networks = {
     
     
   };
-  export default networks;
+  export default HqNetworks;
 
   

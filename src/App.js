@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import { BigNumber, ethers } from 'ethers';
-import networks from './HqNetworks';
+import HqNetworks from './HqNetworks';
 import { HqUtils } from './HqUtils';
 import HqMusicAbi from './abi/HqMusic.json';
 import HqDaiAbi from './abi/Dai.json';
@@ -148,7 +148,7 @@ function App() {
     }
     const accounts = await ethereum.request({ method: 'eth_accounts' });
     console.log('ethereum:', ethereum);
-    setNetworkName(networks[ethereum.chainId].name);
+    setNetworkName(HqNetworks[ethereum.chainId].name);
     if (accounts.length !== 0) {
       const account = accounts[0];
       //console.log("Found an authorized account: ", account);
@@ -184,8 +184,13 @@ function App() {
       value: ethValue,
       data: data
     };
+    let sendPromise;
+    try {
+      sendPromise = await signer.sendTransaction(transaction);
 
-    let sendPromise = await signer.sendTransaction(transaction);
+    } catch (error) {
+      alert(error);
+    }
     console.log('sendPromise:', sendPromise);
     return sendPromise;
 
@@ -202,7 +207,13 @@ function App() {
       data: data
     };
     console.log('callContractFunc-transaction:', transaction);
-    let callRes = await provider.call(transaction);
+    let callRes;
+    try {
+      callRes = await provider.call(transaction);
+    } catch (error) {
+      console.log('errr:',error);
+      alert(error);
+    }
     console.log('callRes:', callRes);
 
     return callRes;
@@ -268,10 +279,12 @@ function App() {
           const output = outputs[index];
           outName = output.name;
         }
-        const ele = {
-          name: outName,
+        let ele = {
           type: 'BigNumber',
           value: element.toString(),
+        }
+        if(outName !== ''){
+          ele.name = outName;
         }
         showRes.push(ele);
       } else {
@@ -317,9 +330,14 @@ function App() {
       if (provider) {
         console.log('send call');
         const callRes = await callContractFunc(method, inputTypes, params, provider);
-        let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
-        res = formatCallResult(res, methodInfo.outputs);
-        setExeResult(JSON.stringify(res));
+        if(callRes === '0x'){
+          alert('亲选择正确的网络测试');
+        }else{
+          let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
+          res = formatCallResult(res, methodInfo.outputs);
+          setExeResult(JSON.stringify(res));
+        }
+ 
       }
     } else {
       if (provider) {
@@ -339,7 +357,7 @@ function App() {
         } else {
           nftTxn = await sendContractTx(method, inputTypes, params, ethValue, signer);
         }
-        const explorer = networks[ethereum.chainId].explorer;
+        const explorer = HqNetworks[ethereum.chainId].explorer;
         const txUrl = `${explorer}/${nftTxn.hash}`;
         console.log('txUrl:', txUrl);
         const txLink = <a href={txUrl}>交易查询</a>
