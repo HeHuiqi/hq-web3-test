@@ -1,4 +1,4 @@
-# 合约测试小能手
+# 合约测试小帮手
 
 写合约 [0xe897f96867953673a2fd264b7003aA7dcD780e54 (rinkeby)](https://rinkeby.etherscan.io/address/0xe897f96867953673a2fd264b7003aa7dcd780e54#writeContract)
 ![snapshot](snapshot/rinkeby-test-write.jpg)
