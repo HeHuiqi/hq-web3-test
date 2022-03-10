@@ -68,8 +68,6 @@ switch (testChoose) {
 
 
 
-
-
 function ContractMethodsList(props) {
 
   let items = [];
@@ -106,9 +104,17 @@ function InputPanel(props) {
   for (i; i < inputs.length; i++) {
     const inputP = inputs[i];
     const param = inputP.name + '(' + inputP.type + ')'
-    let tag = <p key={i}> {param}: <input placeholder='请输入' onChange={inputChange} name={i} /> </p>;
+    let tag = <p key={i}> {param}: <input className='userInput' placeholder='请输入' onChange={inputChange} name={i} /> </p>;
     items.push(tag)
   }
+  if(props.isClearInput){
+    const userInputs =  document.getElementsByClassName('userInput');
+    for (let index = 0; index < userInputs.length; index++) {
+      const element = userInputs[index];
+      element.value = '';
+    }
+  }
+
   if (props.method.stateMutability === 'payable') {
     const inputP = {
       name: 'payEth',
@@ -141,11 +147,12 @@ function App() {
 
   const [currentAccount, setCurrentAccount] = useState('');
   const [networkName, setNetworkName] = useState('Rinkeby');
-
   const [ContractAbi, setContractAbi] = useState(filterAbi(initAbi));
   const [contractAddress, setContractAddress] = useState(initAddress);
   const [selecteIndex, setSelecteIndex] = useState(0);
   const [inputParams, setInputParams] = useState({});
+  const [clearInputValue, setClearInputValue] = useState(false);
+
   const [exeResult, setExeResult] = useState();
 
 
@@ -236,6 +243,15 @@ function App() {
     setSelecteIndex(selectedIndex);
     setInputParams({});
     setExeResult('')
+    setClearInputValue(true);
+  };
+
+  const resetInitState = function(){
+    setSelecteIndex(0);
+    setInputParams({});
+    setClearInputValue(true);
+    setExeResult('')
+    setClearInputValue(true);
   };
 
   const onAbiChange = function (event) {
@@ -244,9 +260,7 @@ function App() {
       let abi = JSON.parse(value);
       abi = filterAbi(abi);
       setContractAbi(abi);
-      setSelecteIndex(0);
-      setInputParams({});
-      setExeResult('')
+      resetInitState();
     }
 
   };
@@ -254,8 +268,7 @@ function App() {
     const value = event.target.value;
     if (value) {
       setContractAddress(value);
-      setInputParams({});
-      setExeResult('')
+      resetInitState();
     }
   }
 
@@ -282,35 +295,35 @@ function App() {
     }
     return showRes;
   };
-
+  
+  const formatParamTypes = function(typeInfos){
+    let newTypes = typeInfos.map((typeInfo)=>{
+        return typeInfo.type
+    });
+    return newTypes;
+  };
+  
   const exeContrantMethod = async function () {
     const selectMethodTag = document.getElementById('selectMethodTag');
     const methodInfo = ContractAbi[selectMethodTag.selectedIndex];
     console.log('methodInfo.stateMutability:', methodInfo.stateMutability);
-    let inputs = '';
-    let outputs = '';
-    for (let i = 0; i < methodInfo.inputs.length; i++) {
-      const inputItem = methodInfo.inputs[i];
-      inputs = inputs + ',' + inputItem.type;
-    }
-    for (let i = 0; i < methodInfo.outputs.length; i++) {
-      const outpuItem = methodInfo.outputs[i];
-      outputs = outputs + ',' + outpuItem.type;
-    }
-    let method = methodInfo.name + '(' + inputs.slice(1) + ')';
+    let inputTypes = formatParamTypes(methodInfo.inputs);
+    let outputTypes = formatParamTypes(methodInfo.outputs);
+    let method = methodInfo.name + '(' + inputTypes.toString() + ')';
     console.log('method:', method);
     console.log('inputParams:', inputParams);
     let params = [];
     Object.keys(inputParams).forEach(function (key) {
       params.push(inputParams[key]);
     });
-
+    
     const provider = getProvider();
-    if (methodInfo.stateMutability === 'view') {
+
+    if (methodInfo.stateMutability === 'view' || methodInfo.stateMutability === 'pure') {
+
       if (provider) {
-        const inputTypes = inputs.split(',').slice(1);
+        console.log('send call');
         const callRes = await callContractFunc(method, inputTypes, params, provider);
-        const outputTypes = outputs.split(',').slice(1);
         let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
         res = formatCallResult(res, methodInfo.outputs);
         setExeResult(JSON.stringify(res));
@@ -326,12 +339,12 @@ function App() {
             params = [];
             ethValue = BigNumber.from(params[0]).toHexString();
           } else {
-            params = params.slice(0, pLen - 1);
-            ethValue = BigNumber.from(params[pLen - 1]).toHexString();
+            const lastParam = params.pop();
+            ethValue = BigNumber.from(lastParam).toHexString();
           }
-          nftTxn = await sendContractTx(method, inputs.split(',').slice(1), params, ethValue, signer)
+          nftTxn = await sendContractTx(method, inputTypes, params, ethValue, signer);
         } else {
-          nftTxn = await sendContractTx(method, inputs.split(',').slice(1), params, ethValue, signer)
+          nftTxn = await sendContractTx(method, inputTypes, params, ethValue, signer);
         }
         const explorer = networks[ethereum.chainId].explorer;
         const txUrl = `${explorer}/${nftTxn.hash}`;
@@ -365,7 +378,7 @@ function App() {
         <input type="text" placeholder='合约地址' defaultValue={contractAddress} onChange={onAddressChange} />
         <p>方法列表</p>
         {ContractAbi ? <ContractMethodsList methods={ContractAbi} selecteIndex={selecteIndex} onSelectMethodChange={onSelectMethodChange} /> : ''}
-        {ContractAbi ? <InputPanel method={ContractAbi[selecteIndex]} inputChange={inputChange} /> : ''}
+        {ContractAbi ? <InputPanel method={ContractAbi[selecteIndex]} isClearInput={clearInputValue} inputChange={inputChange} /> : ''}
 
       </div>
 
