@@ -260,6 +260,7 @@ function App() {
     let showRes = [];
     for (let index = 0; index < result.length; index++) {
       const element = result[index];
+      /*
       const haha = JSON.parse(JSON.stringify(element));
       if (haha.type === 'BigNumber') {
         let outName = '';
@@ -276,6 +277,9 @@ function App() {
       } else {
         showRes.push(element);
       }
+      */
+      showRes.push(element);
+
     }
     return showRes;
   };
