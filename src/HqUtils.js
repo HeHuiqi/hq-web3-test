@@ -23,9 +23,9 @@ const createContract = function(address,abi,signer){
 
 const callContractFunc = async function (to,methodName, types, values, provider) {
   let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
-  console.log('types',types);
-  console.log('values',values);
-  let callRes;
+  // console.log('types',types);
+  // console.log('values',values);
+  let callResult;
   try {
     if (values.length > 0) {
  
@@ -38,20 +38,20 @@ const callContractFunc = async function (to,methodName, types, values, provider)
       data: data
     };
     console.log('callContractFunc-transaction:', transaction);
-    callRes = await provider.call(transaction);
+    callResult = await provider.call(transaction);
   } catch (error) {
     console.log('callContractFunc-eror:', error);
     alert(JSON.stringify(error));
   }
-  console.log('callRes:', callRes);
+  console.log('callResult:', callResult);
 
-  return callRes;
+  return callResult;
 
 };
 const sendContractTx = async function (to,methodName, types, values, ethValue, signer) {
   let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
 
-  let sendPromise;
+  let sendResult;
   try {
     let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x00dgjkdsgg000.....
     if (values.length > 0) {
@@ -62,14 +62,14 @@ const sendContractTx = async function (to,methodName, types, values, ethValue, s
       value: ethValue,
       data: data
     };
-    sendPromise = await signer.sendTransaction(transaction);
+    sendResult = await signer.sendTransaction(transaction);
 
   } catch (error) {
     console.log('sendContractTx-:', error);
     alert(JSON.stringify(error));
   }
-  console.log('sendPromise:', sendPromise);
-  return sendPromise;
+  console.log('sendResult:', sendResult);
+  return sendResult;
 
 };
 

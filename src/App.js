@@ -72,7 +72,7 @@ function ContractMethodsList(props) {
   }
   return (
     <div>
-      <select id='selectMethodTag' onChange={onSelectMethodChange} value={JSON.stringify(defaultMethond)} >  {items} </select>
+      <select id='selectMethodTag' onChange={onSelectMethodChange}  >  {items} </select>
     </div>
   );
 };
@@ -111,7 +111,6 @@ function InputPanel(props) {
     items.push(tag)
 
   }
-  console.log('props.isClearInput:', props.isClearInput);
   if (props.isClearInput) {
     const userInputs = document.getElementsByClassName('userInput');
     for (let index = 0; index < userInputs.length; index++) {
@@ -145,7 +144,6 @@ function App() {
   const [selecteIndex, setSelecteIndex] = useState(0);
   const [inputParams, setInputParams] = useState({});
   const [clearInputValue, setClearInputValue] = useState(false);
-
   const [exeResult, setExeResult] = useState();
 
   // 监听账户和网络的改变
@@ -167,7 +165,7 @@ function App() {
       connectWalletHandler();
     });
   }
-
+  // 检查是否连接钱包
   const checkWalletIsConnected = async () => {
     const { ethereum } = window;
     if (!ethereum) {
@@ -185,7 +183,7 @@ function App() {
       //console.log("No authorized account found");
     }
   }
-
+  // 连接钱包
   const connectWalletHandler = async () => {
     const { ethereum } = window;
 
@@ -249,7 +247,7 @@ function App() {
 
   const formatCallResult = function (result, outputs) {
     let showRes = [];
-    console.log('outputs:',outputs);
+    // console.log('outputs:',outputs);
     for (let index = 0; index < result.length; index++) {
       const element = result[index];
       const output = outputs[index];
@@ -267,27 +265,24 @@ function App() {
     return showRes;
   };
 
-
-
   const formatParamTypes = function (typeInfos) {
     let newTypes = typeInfos.map((typeInfo) => {
       return typeInfo.type
     });
     return newTypes;
   };
-
+  // 开始执行方法
   const exeContrantMethod = async function () {
     setExeResult('');
     setClearInputValue(false);
 
+    const methodInfo = ContractAbi[selecteIndex];
 
-    const selectMethodTag = document.getElementById('selectMethodTag');
-    const methodInfo = ContractAbi[selectMethodTag.selectedIndex];
-    console.log('methodInfo.stateMutability:', methodInfo.stateMutability);
     let inputTypes = formatParamTypes(methodInfo.inputs);
     let outputTypes = formatParamTypes(methodInfo.outputs);
+
     let method = methodInfo.name + '(' + inputTypes.toString() + ')';
-    console.log('method:', method);
+    console.log('method:','function', method,methodInfo.stateMutability);
     console.log('inputParams:', inputParams);
     let params = [];
     Object.keys(inputParams).forEach(function (key) {
@@ -304,7 +299,6 @@ function App() {
     if (methodInfo.stateMutability === 'view' || methodInfo.stateMutability === 'pure') {
 
       if (provider) {
-        console.log('send call');
         const callRes = await HqUtils.callContractFunc(contractAddress,method, inputTypes, params, provider);
         if (callRes === '0x') {
           alert('亲选择正确的网络测试');
@@ -367,8 +361,8 @@ function App() {
         <p>输入合约地址</p>
         <input type="text" placeholder='合约地址' defaultValue={contractAddress} onChange={onAddressChange} />
         <p>方法列表</p>
-        {ContractAbi ? <ContractMethodsList methods={ContractAbi} selecteIndex={selecteIndex} onSelectMethodChange={onSelectMethodChange} /> : ''}
-        {ContractAbi ? <InputPanel method={ContractAbi[selecteIndex]} isClearInput={clearInputValue} inputChange={inputChange} /> : ''}
+        <ContractMethodsList methods={ContractAbi} selecteIndex={selecteIndex} onSelectMethodChange={onSelectMethodChange} />
+        <InputPanel method={ContractAbi[selecteIndex]} isClearInput={clearInputValue} inputChange={inputChange} />
 
       </div>
 
