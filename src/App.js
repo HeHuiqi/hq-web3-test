@@ -301,8 +301,15 @@ function App() {
     console.log('inputParams:', inputParams);
     let params = [];
     Object.keys(inputParams).forEach(function (key) {
-      params.push(inputParams[key]);
+      let value = inputParams[key];
+      if(value.indexOf('[') === 0){
+        console.log('input_value2:',value);
+        value = JSON.parse(value);
+      }
+      params.push(value);
     });
+
+    // ["0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","0xc778417e063141139fce010982780140aa0cd5ab"]
 
     const provider = getProvider();
     if (methodInfo.stateMutability === 'view' || methodInfo.stateMutability === 'pure') {

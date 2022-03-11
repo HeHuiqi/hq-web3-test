@@ -23,10 +23,13 @@ const createContract = function(address,abi,signer){
 
 const callContractFunc = async function (to,methodName, types, values, provider) {
   let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
-
+  console.log('types',types);
+  console.log('values',values);
   let callRes;
   try {
     if (values.length > 0) {
+ 
+
       let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x0777999....
       data = data + params.slice(2);
     }
@@ -38,7 +41,7 @@ const callContractFunc = async function (to,methodName, types, values, provider)
     callRes = await provider.call(transaction);
   } catch (error) {
     console.log('callContractFunc-eror:', error);
-    alert(error);
+    alert(JSON.stringify(error));
   }
   console.log('callRes:', callRes);
 
