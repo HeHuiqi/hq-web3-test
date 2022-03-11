@@ -141,6 +141,7 @@ function App() {
       }
     });
     ethereum.on('chainChanged', (chainId) => {
+      // console.log(ethereum);
       console.log('chainChanged-chainId',chainId, HqNetworks[chainId]);
       const netName = HqNetworks[chainId] ? HqNetworks[chainId].name : 'Unknown';
       setNetworkName(netName);
