@@ -249,27 +249,17 @@ function App() {
 
   const formatCallResult = function (result, outputs) {
     let showRes = [];
+    console.log('outputs:',outputs);
     for (let index = 0; index < result.length; index++) {
       const element = result[index];
-
-      const haha = JSON.parse(JSON.stringify(element));
-      if (haha.type === 'BigNumber') {
-        let outName = '';
-        if (index < outputs.length) {
-          const output = outputs[index];
-          outName = output.name;
-        }
-        let ele = {
-          type: 'BigNumber',
-          value: element.toString(),
-        }
-        if (outName !== '') {
-          ele.name = outName;
-        }
-        showRes.push(ele);
-      } else {
-        showRes.push(element);
+      const output = outputs[index];
+      let outName = output.name === '' ? output.type :output.name;
+      let ele = {
+        type:output.type,
+        name: outName,
+        value: element.toString(),
       }
+      showRes.push(ele);
 
       // showRes.push(element);
 
@@ -303,7 +293,6 @@ function App() {
     Object.keys(inputParams).forEach(function (key) {
       let value = inputParams[key];
       if(value.indexOf('[') === 0){
-        console.log('input_value2:',value);
         value = JSON.parse(value);
       }
       params.push(value);
