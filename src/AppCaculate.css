@@ -1,0 +1,12 @@
+.AppCaculate {
+    background-color: cornflowerblue;
+    width: 46%;
+    float: left;
+}
+
+.caculateInputInfo {
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: aqua;
+    border-radius: 5px;
+}

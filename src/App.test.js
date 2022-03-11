@@ -1,4 +1,15 @@
 
+import HqRouterAbi from './abi/UNIRouter.json';
+
+const HqRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
+
+ const testGetAmountOut = async function (signer) {
+    const contract = createContract(HqRouterAddress,HqRouterAbi,signer);
+    let out = await contract.functions['getAmountOut'].apply(contract,['100','1000','500']);
+    out  = JSON.parse(JSON.stringify(out[0]));
+    console.log('out:',out);
+};
+
 const obj = {
 
   goRun: function(speed,action){

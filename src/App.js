@@ -21,16 +21,6 @@ const HqDaiAddress = "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735";
 const HqGardenAddress = '0xAc79cf53C72b47c1478D340D435e28907426D01E'
 
 const { ethereum } = window;
-if (ethereum) {
-  ethereum.on('accountsChanged', (accounts) => {
-    console.log('accountsChanged');
-    window.location.reload();
-  });
-  ethereum.on('chainChanged', (chainId) => {
-    console.log('chainChanged');
-    window.location.reload();
-  });
-}
 
 const getProvider = function () {
   if (ethereum) {
@@ -43,7 +33,7 @@ const getProvider = function () {
 
 let initAddress = HqMusicAddress;
 let initAbi = HqMusicAbi;
-let testChoose = 2;
+let testChoose = 3;
 switch (testChoose) {
   case 1:
     initAddress = HqDaiAddress;
@@ -139,6 +129,24 @@ function App() {
 
   const [exeResult, setExeResult] = useState();
 
+  // 监听账户和网络的改变
+  if (ethereum) {
+    ethereum.on('accountsChanged', (accounts) => {
+      console.log('accountsChanged,',accounts[0]);
+
+      if (accounts.length !== 0) {
+        const account = accounts[0];
+        //console.log("Found an authorized account: ", account);
+        setCurrentAccount(account);
+      }
+    });
+    ethereum.on('chainChanged', (chainId) => {
+      console.log('chainChanged-chainId',chainId, HqNetworks[chainId]);
+      const netName = HqNetworks[chainId] ? HqNetworks[chainId].name : 'Unknown';
+      setNetworkName(netName);
+      connectWalletHandler();
+    });
+  }
 
   const checkWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -147,8 +155,8 @@ function App() {
       return;
     }
     const accounts = await ethereum.request({ method: 'eth_accounts' });
-    console.log('ethereum:', ethereum);
-    setNetworkName(HqNetworks[ethereum.chainId].name);
+    const netName = HqNetworks[ethereum.chainId] ? HqNetworks[ethereum.chainId].name : 'Unknown';
+    setNetworkName(netName);
     if (accounts.length !== 0) {
       const account = accounts[0];
       //console.log("Found an authorized account: ", account);
@@ -172,56 +180,6 @@ function App() {
       //console.log('connectWalletHandler-err:', err)
     }
   }
-
-  const sendContractTx = async function (methodName, types, values, ethValue, signer) {
-    let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
-
-    let sendPromise;
-    try {
-      let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x00dgjkdsgg000.....
-      if (values.length > 0) {
-        data = data + params.slice(2);
-      }
-      const transaction = {
-        to: contractAddress,
-        value: ethValue,
-        data: data
-      };
-      sendPromise = await signer.sendTransaction(transaction);
-
-    } catch (error) {
-      console.log('sendContractTx-:', error);
-      alert(error);
-    }
-    console.log('sendPromise:', sendPromise);
-    return sendPromise;
-
-  };
-  const callContractFunc = async function (methodName, types, values, provider) {
-    let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
-
-    let callRes;
-    try {
-      if (values.length > 0) {
-        let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x0777999....
-        data = data + params.slice(2);
-      }
-      let transaction = {
-        to: contractAddress,
-        data: data
-      };
-      console.log('callContractFunc-transaction:', transaction);
-      callRes = await provider.call(transaction);
-    } catch (error) {
-      console.log('callContractFunc-eror:', error);
-      alert(error);
-    }
-    console.log('callRes:', callRes);
-
-    return callRes;
-
-  };
-
 
   // 连接matemask
   const connectWalletButton = () => {
@@ -331,7 +289,7 @@ function App() {
 
       if (provider) {
         console.log('send call');
-        const callRes = await callContractFunc(method, inputTypes, params, provider);
+        const callRes = await HqUtils.callContractFunc(contractAddress,method, inputTypes, params, provider);
         if (callRes === '0x') {
           alert('亲选择正确的网络测试');
         } else {
@@ -355,9 +313,9 @@ function App() {
             const lastParam = params.pop();
             ethValue = BigNumber.from(lastParam).toHexString();
           }
-          nftTxn = await sendContractTx(method, inputTypes, params, ethValue, signer);
+          nftTxn = await HqUtils.sendContractTx(contractAddress,method, inputTypes, params, ethValue, signer);
         } else {
-          nftTxn = await sendContractTx(method, inputTypes, params, ethValue, signer);
+          nftTxn = await HqUtils.sendContractTx(contractAddress,method, inputTypes, params, ethValue, signer);
         }
         if(nftTxn){
           const explorer = HqNetworks[ethereum.chainId].explorer;
@@ -383,8 +341,8 @@ function App() {
   return (
     <div className='App'>
       {currentAccount ? '' : connectWalletButton()}
-      <h2>Account:{currentAccount}</h2>
-      <h4>Network:<span className='showNetwork'>{networkName}</span></h4>
+      <h2>Account：{currentAccount}</h2>
+      <h4>Network：<span className='showNetwork'>{networkName}</span></h4>
 
       <div className='contractInfo'>
         <p>输入Abi</p>

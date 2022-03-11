@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+// import AppCaculate from './AppCaculate';
 import reportWebVitals from './reportWebVitals';
 
 
@@ -9,6 +10,7 @@ import reportWebVitals from './reportWebVitals';
 ReactDOM.render(
   <React.StrictMode>
     <App />   
+    {/* <AppCaculate/> */}
   </React.StrictMode>,
   document.getElementById('root')
 );

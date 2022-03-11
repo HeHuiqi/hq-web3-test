@@ -1,8 +1,4 @@
 import { BigNumber, ethers } from 'ethers';
-import HqRouterAbi from './abi/UNIRouter.json';
-
-const HqRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
-
 const filterAbi = function (abi) {
     let res = [];
     for (let index = 0; index < abi.length; index++) {
@@ -23,17 +19,62 @@ const createContract = function(address,abi,signer){
     return contract;
 
 };
- const testGetAmountOut = async function () {
-    const provider = getProvider();
-    const signer = provider.getSigner();
-    const contract = createContract(HqRouterAddress,HqRouterAbi,signer);
-    let out = await contract.functions['getAmountOut'].apply(contract,['100','1000','500']);
-    out  = JSON.parse(JSON.stringify(out[0]));
-    console.log('out:',out);
+
+
+const callContractFunc = async function (to,methodName, types, values, provider) {
+  let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
+
+  let callRes;
+  try {
+    if (values.length > 0) {
+      let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x0777999....
+      data = data + params.slice(2);
+    }
+    let transaction = {
+      to: to,
+      data: data
+    };
+    console.log('callContractFunc-transaction:', transaction);
+    callRes = await provider.call(transaction);
+  } catch (error) {
+    console.log('callContractFunc-eror:', error);
+    alert(error);
+  }
+  console.log('callRes:', callRes);
+
+  return callRes;
+
 };
+const sendContractTx = async function (to,methodName, types, values, ethValue, signer) {
+  let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
+
+  let sendPromise;
+  try {
+    let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x00dgjkdsgg000.....
+    if (values.length > 0) {
+      data = data + params.slice(2);
+    }
+    const transaction = {
+      to: to,
+      value: ethValue,
+      data: data
+    };
+    sendPromise = await signer.sendTransaction(transaction);
+
+  } catch (error) {
+    console.log('sendContractTx-:', error);
+    alert(error);
+  }
+  console.log('sendPromise:', sendPromise);
+  return sendPromise;
+
+};
+
 
 export const HqUtils= {
     getProvider,
     createContract,
     filterAbi,
+    callContractFunc,
+    sendContractTx,
 };
