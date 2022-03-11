@@ -25,6 +25,8 @@ button {
     outline-style: none;
     width: 40%;
     height: 30px;
+    border: 1px solid rgb(192, 186, 185);
+    border-radius: 5px;
 }
 
 .contractInfo select {

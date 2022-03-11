@@ -63,7 +63,7 @@ const sendContractTx = async function (to,methodName, types, values, ethValue, s
 
   } catch (error) {
     console.log('sendContractTx-:', error);
-    alert(error);
+    alert(JSON.stringify(error));
   }
   console.log('sendPromise:', sendPromise);
   return sendPromise;

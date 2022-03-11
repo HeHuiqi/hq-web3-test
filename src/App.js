@@ -60,6 +60,7 @@ function ContractMethodsList(props) {
   let items = [];
   const onSelectMethodChange = function (event) {
     props.onSelectMethodChange(event.target.selectedIndex);
+    console.log('onSelectMethodChange:',event.target.value);
   }
   const methods = props.methods;
   let defaultMethond = methods[props.selecteIndex]
@@ -86,11 +87,29 @@ function InputPanel(props) {
   let i = 0;
   let inputs = props.method.inputs;
 
+  const inputItem = function(key,paramType,indexName){
+
+    // return(
+    //   <p key={key}> 
+    //     {paramType}: 
+    //     <input className='userInput' placeholder='请输入' onChange={inputChange} name={indexName} />
+    //   </p>
+    // );
+
+    return(
+      <div key={key}> 
+        <p>{paramType}</p> 
+        <input className='userInput' lable={paramType} placeholder='请输入' onChange={inputChange} name={indexName} />
+      </div>
+    );
+  };
+
   for (i; i < inputs.length; i++) {
     const inputP = inputs[i];
-    const param = inputP.name + '(' + inputP.type + ')'
-    let tag = <p key={i}> {param}: <input className='userInput' placeholder='请输入' onChange={inputChange} name={i} /> </p>;
+    const paramType = inputP.name + '(' + inputP.type + ')'
+    const tag = inputItem(i,paramType,i);
     items.push(tag)
+
   }
   console.log('props.isClearInput:', props.isClearInput);
   if (props.isClearInput) {
@@ -106,8 +125,8 @@ function InputPanel(props) {
       name: 'payEth',
       type: 'uint256',
     };
-    const param = inputP.name + '(' + inputP.type + ')'
-    let tag = <p key={i}> {param}: <input placeholder='请输入' onChange={inputChange} name={i} /> </p>;
+    const paramType = inputP.name + '(' + inputP.type + ')'
+    let tag = inputItem(i,paramType,i);
     items.push(tag);
   }
   return (

@@ -1,6 +1,6 @@
 const HqNetworks = {
     "0x1":{
-      chainId: 1,
+      chainId: 1, 
       url:'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
       name:'Ethereum',
       explorer:'https://etherscan.io/tx'
@@ -42,13 +42,13 @@ const HqNetworks = {
     '0x7f93':{
         chainId:32659,
         url:'https://mainway.freemoon.xyz/gate/',
-        name:'FSNMain',
+        name:'Fusion',
         explorer:'https://fsnex.com/transaction'
     },
     '0xb660':{
         chainId:46688,
         url:'https://testway.freemoon.xyz/gateway',
-        name:'FSNTest'
+        name:'FusionTest'
     },
     '0x13881':{
         chainId:80001,
@@ -66,7 +66,14 @@ const HqNetworks = {
       url:'https://api.s0.t.hmny.io',
       name:'Harmony',
       explorer:'https://explorer.harmony.one/tx',
-  },
+    },
+
+    '0x80':{
+      chainId:128,
+      url:'https://http-mainnet.hecochain.com',
+      name:'HECO',
+      explorer:'https://hecoinfo.com',
+    },
     
     
   };
