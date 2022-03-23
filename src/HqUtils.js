@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from 'ethers';
+import {  ethers } from 'ethers';
 const filterAbi = function (abi) {
     let res = [];
     for (let index = 0; index < abi.length; index++) {
@@ -9,7 +9,7 @@ const filterAbi = function (abi) {
     }
     return res;
   }
-// const { ethereum } = window;
+const { ethereum } = window;
 const getProvider = function (ethereum) {
     const provider = new ethers.providers.Web3Provider(ethereum);
     return provider;
@@ -20,25 +20,17 @@ const createContract = function(address,abi,signer){
 
 };
 
+const callContractFunc = async function (address,abi,methodName,values,signer) {
+  console.log('hq-methodName:',methodName);
+  console.log('hq-methodName:',signer);
 
-const callContractFunc = async function (to,methodName, types, values, provider) {
-  let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
-  // console.log('types',types);
-  // console.log('values',values);
+  const contract = createContract(address,abi,signer);
+  console.log(contract);
+
   let callResult;
   try {
-    if (values.length > 0) {
- 
-
-      let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x0777999....
-      data = data + params.slice(2);
-    }
-    let transaction = {
-      to: to,
-      data: data
-    };
-    console.log('callContractFunc-transaction:', transaction);
-    callResult = await provider.call(transaction);
+    console.log('callContractFunc-transaction:', contract);
+    callResult = await contract[methodName].apply(contract,values);
   } catch (error) {
     console.log('callContractFunc-eror:', error);
     alert(JSON.stringify(error));
@@ -48,24 +40,26 @@ const callContractFunc = async function (to,methodName, types, values, provider)
   return callResult;
 
 };
-const sendContractTx = async function (to,methodName, types, values, ethValue, signer) {
-  let data = ethers.utils.hexDataSlice(ethers.utils.id(methodName), 0, 4);
 
+
+const sendContractTx = async function (address,abi,methodName,values, ethValue, signer) {
   let sendResult;
+  console.log('send-methodName:',methodName);
+  const contract = createContract(address,abi,signer);
   try {
-    let params = ethers.utils.defaultAbiCoder.encode(types, values); // 0x00dgjkdsgg000.....
-    if (values.length > 0) {
-      data = data + params.slice(2);
+
+    let overrides = {
+      value: ethValue
     }
-    const transaction = {
-      to: to,
-      value: ethValue,
-      data: data
-    };
-    sendResult = await signer.sendTransaction(transaction);
+    let allParams = values;
+    if(ethValue !== '0x00'){
+      allParams.push(overrides);
+    }
+    sendResult = await contract[methodName].apply(contract,allParams);
+    sendResult = await sendResult.wait();
 
   } catch (error) {
-    console.log('sendContractTx-:', error);
+    console.log('sendContractTx-error:', error);
     alert(JSON.stringify(error));
   }
   console.log('sendResult:', sendResult);
@@ -74,10 +68,32 @@ const sendContractTx = async function (to,methodName, types, values, ethValue, s
 };
 
 
-export const HqUtils= {
+/*
+部署合约
+@param bytecode String 合约字节码
+@param args Array 在部署合约时传递给构造函数的参数
+*/
+const deployContract =  async function (bytecode, abi, args) {
+  console.log('开始部署合约......');
+  const provider = getProvider(ethereum);
+  const signer =  provider.getSigner();
+  console.log('abi',abi);
+  console.log('bytcode',bytecode);
+  console.log('args',args);
+  let factory =  new ethers.ContractFactory(abi, bytecode,signer);
+
+  let contract = await factory.deploy.apply(factory,args);
+  await contract.deployed();
+  console.log('部署成功，合约地址：' + contract.address );
+  return contract;
+}
+
+ const HqUtils= {
     getProvider,
+    deployContract,
     createContract,
     filterAbi,
     callContractFunc,
     sendContractTx,
 };
+export default HqUtils;

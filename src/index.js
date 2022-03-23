@@ -1,17 +1,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import { BrowserRouter,Routes, Route } from 'react-router-dom';
+
 import './index.css';
 import App from './App';
-// import AppCaculate from './AppCaculate';
+
+import HqDeployContract from './HqDeployContract'
+
 import reportWebVitals from './reportWebVitals';
 
 
+// ReactDOM.render(
+//   <React.StrictMode>
+//     <App />   
+//   </React.StrictMode>,
+//   document.getElementById('root')
+// );
+
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />   
-    {/* <AppCaculate/> */}
-  </React.StrictMode>,
+  <BrowserRouter>
+  <Routes>
+    <Route path="/" element={<App/>}></Route>
+    <Route path="/deploy/:currentAccount" element={<HqDeployContract/>}></Route>
+  </Routes>
+</BrowserRouter>,
   document.getElementById('root')
 );
 

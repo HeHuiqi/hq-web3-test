@@ -1,24 +1,37 @@
 import { useEffect, useState } from 'react';
+import { BigNumber } from 'ethers';
+
+import { Link } from 'react-router-dom';
+
 import './App.css';
-import { BigNumber, ethers } from 'ethers';
 import HqNetworks from './HqNetworks';
-import { HqUtils } from './HqUtils';
+import HqUtils from './HqUtils';
+
 import HqMusicAbi from './abi/HqMusic.json';
-import HqDaiAbi from './abi/Dai.json';
-import HqGardenAbi from './abi/Garden.json'
-import HqRouterAbi from './abi/UNIRouter.json';
+import HqERC20Abi from './abi/ERC20.json';
+import HqRouterAbi from './abi/UniswapV2Router02.json';
+import HqFactoryAbi from './abi/UniswapV2Factory.json';
+import HqPairAbi from './abi/UniswapV2Pair.json'
+import HqMultiCallAbi  from './abi/Multicall.json'
 
-// https://rinkeby.etherscan.io/address/0x7a250d5630b4cf539739df2c5dacb4c659f2488d#readContract
-const HqRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
-
-// https://rinkeby.etherscan.io/address/0xe897f96867953673a2fd264b7003aa7dcd780e54#readContract
-const HqMusicAddress = "0xe897f96867953673a2fd264b7003aA7dcD780e54";
 
 // https://rinkeby.etherscan.io/address/0xc7ad46e0b8a400bb3c915120d284aafba8fc4735#code dai
 const HqDaiAddress = "0xc7ad46e0b8a400bb3c915120d284aafba8fc4735";
 
-// https://testnet.bscscan.com/address/0xAc79cf53C72b47c1478D340D435e28907426D01E#code
-const HqGardenAddress = '0xAc79cf53C72b47c1478D340D435e28907426D01E'
+// https://rinkeby.etherscan.io/address/0x7a250d5630b4cf539739df2c5dacb4c659f2488d#readContract
+const HqRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
+
+
+// https://rinkeby.etherscan.io/address/0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f#code
+const HqFactoryAddress = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
+
+
+// https://rinkeby.etherscan.io/address/0xe897f96867953673a2fd264b7003aa7dcd780e54#readContract
+const HqMusicAddress = "0xe897f96867953673a2fd264b7003aA7dcD780e54";
+
+
+// https://testnet.bscscan.com/address/0x8F3273Fb89B075b1645095ABaC6ed17B2d4Bc576#code
+const HqMultiCallAddress = '0x8F3273Fb89B075b1645095ABaC6ed17B2d4Bc576'
 
 const { ethereum } = window;
 
@@ -31,29 +44,30 @@ const getProvider = function () {
 };
 
 
-let initAddress = HqMusicAddress;
-let initAbi = HqMusicAbi;
-let testChoose = 2;
-switch (testChoose) {
-  case 1:
-    initAddress = HqDaiAddress;
-    initAbi = HqDaiAbi;
-    break;
-  case 2:
-    initAddress = HqRouterAddress;
-    initAbi = HqRouterAbi;
-    break;
-  case 3:
-    initAddress = HqGardenAddress;
-    initAbi = HqGardenAbi;
-    break;
+let initAddress = HqDaiAddress;
+let initAbi = HqERC20Abi;
 
-
-  default:
-    break;
+const publickAbiInfo = {
+  abiArray:[HqERC20Abi,HqRouterAbi,HqFactoryAbi,HqPairAbi,HqMusicAbi,HqMultiCallAbi],
+  addressArray:[HqDaiAddress,HqRouterAddress,HqFactoryAddress,'',HqMusicAddress,HqMultiCallAddress]
+};
+function PublickAbiList(props){
+  let items = [] ;
+  let abiNameList = ["ERC20Abi","UniswapV2Router02Abi","UniswapV2Factory","UniswapV2PairAbi","HqMusicAbi","MultiCallAbi"];
+  const onSelectAbiChange = function (event) {
+    console.log('onSelectAbiChange:',event.target.selectedIndex);
+    props.onSelectAbiChange(event.target.selectedIndex);
+  }
+  for (let i = 0; i < abiNameList.length; i++) {
+    const abiName = abiNameList[i]
+    items.push(<option className='selectItem' key={i} value={abiName}  >{abiName}</option>)
+  }
+  return (
+    <div>
+      <select  onChange={onSelectAbiChange}  >  {items} </select>
+    </div>
+  );
 }
-
-
 
 function ContractMethodsList(props) {
 
@@ -88,14 +102,6 @@ function InputPanel(props) {
   let inputs = props.method.inputs;
 
   const inputItem = function(key,paramType,indexName){
-
-    // return(
-    //   <p key={key}> 
-    //     {paramType}: 
-    //     <input className='userInput' placeholder='请输入' onChange={inputChange} name={indexName} />
-    //   </p>
-    // );
-
     return(
       <div key={key}> 
         <p>{paramType}</p> 
@@ -212,6 +218,25 @@ function App() {
     checkWalletIsConnected();
   }, [])
 
+  //abi 变化
+  const onSelectAbiChange = function (index) {
+    console.log('app-onSelectAbiChange:',index);
+    
+    let abi = publickAbiInfo.abiArray[index];
+    abi = HqUtils.filterAbi(abi);
+    const address = publickAbiInfo.addressArray[index];
+    
+    const inputAbiTag = document.getElementById('inputAbiTag');
+    inputAbiTag.value = JSON.stringify(abi);
+    const inputAddressTag = document.getElementById('inputAddressTag');
+    inputAddressTag.value = address;
+
+    setContractAbi(abi);
+    resetInitState();
+    setContractAddress(address);
+
+  }
+  // 方法改变
   const onSelectMethodChange = function (selectedIndex) {
     setSelecteIndex(selectedIndex);
     setInputParams({});
@@ -226,14 +251,21 @@ function App() {
     setClearInputValue(true);
     setExeResult('')
   };
-
+  // abi 输入变化
   const onAbiChange = function (event) {
+
+    console.log('onAbiChange');
     const value = event.target.value;
     if (value) {
-      let abi = JSON.parse(value);
-      abi = HqUtils.filterAbi(abi);
-      setContractAbi(abi);
-      resetInitState();
+      try {
+        let abi = JSON.parse(value);
+        abi = HqUtils.filterAbi(abi);
+        setContractAbi(abi);
+        resetInitState();
+        setContractAddress('');
+      } catch (error) {
+        
+      }
     }
 
   };
@@ -244,68 +276,39 @@ function App() {
       resetInitState();
     }
   }
-
-  const formatCallResult = function (result, outputs) {
-    let showRes = [];
-    // console.log('outputs:',outputs);
-    for (let index = 0; index < result.length; index++) {
-      const element = result[index];
-      const output = outputs[index];
-      let outName = output.name === '' ? output.type :output.name;
-      let ele = {
-        type:output.type,
-        name: outName,
-        value: element.toString(),
-      }
-      showRes.push(ele);
-
-      // showRes.push(element);
-
-    }
-    return showRes;
-  };
-
-  const formatParamTypes = function (typeInfos) {
-    let newTypes = typeInfos.map((typeInfo) => {
-      return typeInfo.type
-    });
-    return newTypes;
-  };
   // 开始执行方法
   const exeContrantMethod = async function () {
     setExeResult('');
     setClearInputValue(false);
 
     const methodInfo = ContractAbi[selecteIndex];
-
-    let inputTypes = formatParamTypes(methodInfo.inputs);
-    let outputTypes = formatParamTypes(methodInfo.outputs);
-
-    let method = methodInfo.name + '(' + inputTypes.toString() + ')';
+    let method = methodInfo.name;
     console.log('method:','function', method,methodInfo.stateMutability);
     console.log('inputParams:', inputParams);
     let params = [];
+    // ["0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","0xc778417e063141139fce010982780140aa0cd5ab"]
+
     Object.keys(inputParams).forEach(function (key) {
       let value = inputParams[key];
+      // 解析输入的数组参数
       if(value.indexOf('[') === 0){
         value = JSON.parse(value);
       }
       params.push(value);
     });
 
-    // ["0x1f9840a85d5af5bf1d1762f925bdaddc4201f984","0xc778417e063141139fce010982780140aa0cd5ab"]
 
     const provider = getProvider();
     if (methodInfo.stateMutability === 'view' || methodInfo.stateMutability === 'pure') {
 
       if (provider) {
-        const callRes = await HqUtils.callContractFunc(contractAddress,method, inputTypes, params, provider);
+        const callRes = await HqUtils.callContractFunc(contractAddress,ContractAbi,method,params, provider.getSigner());
         if (callRes === '0x') {
           alert('亲选择正确的网络测试');
         } else {
-          let res = ethers.utils.defaultAbiCoder.decode(outputTypes, callRes);
-          res = formatCallResult(res, methodInfo.outputs);
+          let res = {result:callRes.toString()};
           setExeResult(JSON.stringify(res));
+
         }
 
       }
@@ -323,9 +326,9 @@ function App() {
             const lastParam = params.pop();
             ethValue = BigNumber.from(lastParam).toHexString();
           }
-          nftTxn = await HqUtils.sendContractTx(contractAddress,method, inputTypes, params, ethValue, signer);
+          nftTxn = await HqUtils.sendContractTx(contractAddress,ContractAbi,method, params, ethValue, signer);
         } else {
-          nftTxn = await HqUtils.sendContractTx(contractAddress,method, inputTypes, params, ethValue, signer);
+          nftTxn = await HqUtils.sendContractTx(contractAddress,ContractAbi,method,params, ethValue, signer);
         }
         if(nftTxn){
           const explorer = HqNetworks[ethereum.chainId].explorer;
@@ -348,18 +351,25 @@ function App() {
     setInputParams(params);
   }
 
+  // console.log('ContractAbi:',ContractAbi);
+
   return (
     <div className='App'>
+  
       {currentAccount ? '' : connectWalletButton()}
       <h2>Account：{currentAccount}</h2>
       <h4>Network：<span className='showNetwork'>{networkName}</span></h4>
+      <p className="deployLink">
+        <Link to={`/deploy/${currentAccount}`}>Deploy Contract</Link>
+      </p>
 
+      <PublickAbiList onSelectAbiChange={onSelectAbiChange}/>
       <div className='contractInfo'>
         <p>输入Abi</p>
-        <textarea rows="15" cols="100" defaultValue={JSON.stringify(ContractAbi)} onChange={onAbiChange}>
+        <textarea id='inputAbiTag' rows="15" cols="100" defaultValue={JSON.stringify(ContractAbi)}  onChange={onAbiChange}>
         </textarea>
         <p>输入合约地址</p>
-        <input type="text" placeholder='合约地址' defaultValue={contractAddress} onChange={onAddressChange} />
+        <input id='inputAddressTag' type="text" placeholder='合约地址' defaultValue={contractAddress} onChange={onAddressChange} />
         <p>方法列表</p>
         <ContractMethodsList methods={ContractAbi} selecteIndex={selecteIndex} onSelectMethodChange={onSelectMethodChange} />
         <InputPanel method={ContractAbi[selecteIndex]} isClearInput={clearInputValue} inputChange={inputChange} />
@@ -370,6 +380,7 @@ function App() {
         <button onClick={exeContrantMethod}>执行合约方法</button>
       </div>
       <p className='txResult' >结果：{exeResult}</p>
+
     </div>
   )
 }
