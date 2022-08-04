@@ -151,6 +151,18 @@ function App() {
   const [inputParams, setInputParams] = useState({});
   const [clearInputValue, setClearInputValue] = useState(false);
   const [exeResult, setExeResult] = useState();
+  const [exeButtonTitle,setBxeButtonTitle] = useState('执行合约方法');
+
+  const onChangeExeButtonTitle = function(){
+    const methodInfo = ContractAbi[selecteIndex];
+    if (methodInfo.stateMutability === 'view' || methodInfo.stateMutability === 'pure') {
+      setBxeButtonTitle('读合约');
+    }else{
+      setBxeButtonTitle('写合约');
+    }
+    
+  }
+
 
   // 监听账户和网络的改变
   if (ethereum) {
@@ -218,6 +230,10 @@ function App() {
     checkWalletIsConnected();
   }, [])
 
+  useEffect(() => {
+    onChangeExeButtonTitle();
+  })
+
   //abi 变化
   const onSelectAbiChange = function (index) {
     console.log('app-onSelectAbiChange:',index);
@@ -242,6 +258,7 @@ function App() {
     setInputParams({});
     setExeResult('')
     setClearInputValue(true);
+    onChangeExeButtonTitle();
 
   };
 
@@ -251,6 +268,7 @@ function App() {
     setClearInputValue(true);
     setExeResult('')
   };
+  
   // abi 输入变化
   const onAbiChange = function (event) {
 
@@ -263,12 +281,14 @@ function App() {
         setContractAbi(abi);
         resetInitState();
         setContractAddress('');
+        onChangeExeButtonTitle();
       } catch (error) {
         
       }
     }
 
   };
+ 
   const onAddressChange = function (event) {
     const value = event.target.value;
     if (value) {
@@ -377,7 +397,7 @@ function App() {
       </div>
 
       <div className='exeOperate'>
-        <button onClick={exeContrantMethod}>执行合约方法</button>
+        <button onClick={exeContrantMethod}>{exeButtonTitle}</button>
       </div>
       <p className='txResult' >结果：{exeResult}</p>
 
