@@ -263,7 +263,7 @@ function App() {
   };
 
   const resetInitState = function () {
-    setSelecteIndex(0);
+    // setSelecteIndex(0);
     setInputParams({});
     setClearInputValue(true);
     setExeResult('')
@@ -276,11 +276,12 @@ function App() {
     const value = event.target.value;
     if (value) {
       try {
-        let abi = JSON.parse(value);
+
+        let abi = JSON.parse(value.trim());
         abi = HqUtils.filterAbi(abi);
         setContractAbi(abi);
         resetInitState();
-        setContractAddress('');
+        // setContractAddress('');
         onChangeExeButtonTitle();
       } catch (error) {
         
